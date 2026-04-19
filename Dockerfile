@@ -30,12 +30,15 @@ COPY . .
 # Install dependencies
 RUN composer install --optimize-autoloader --no-dev --ignore-platform-reqs
 
+# Bersihkan config cache saat build
+RUN php artisan config:clear
+
 # Beri permission ke folder Laravel
 RUN chown -R www-data:www-data /app/storage /app/bootstrap/cache
 
-# Port default
+# Pastikan PORT terbaca
 ENV PORT=8000
 EXPOSE 8000
 
-# Start command yang diminta
-CMD sh -c "php artisan migrate --force && php artisan serve --host=0.0.0.0 --port=${PORT:-8000}"
+# Jalankan migrasi dan server (menggunakan shell form agar variabel $PORT terbaca)
+CMD php artisan migrate --force && php artisan serve --host=0.0.0.0 --port=$PORT
