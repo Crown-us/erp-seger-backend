@@ -46,6 +46,15 @@ class DatabaseSeeder extends Seeder
             'workplace_id' => $ptB->id
         ]);
 
+        // 4. Create Admin
+        User::create([
+            'nik' => 'admin123',
+            'name' => 'Super Admin',
+            'email' => 'admin@seger.com',
+            'password' => Hash::make('password'),
+            'role' => 'admin'
+        ]);
+
         // Call other seeders if needed
         $this->call([
             ProductSeeder::class,
