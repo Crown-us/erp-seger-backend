@@ -1,14 +1,13 @@
 kind: project
-name: erp-seger-backend
+name: WarungTosku
 
 environments:
   production:
     database:
-      type: mysql
-      version: 8.0
+      type: postgresql
+      version: 16
     build:
       - composer install --no-dev --optimize-autoloader
-      - php artisan config:cache
-      - php artisan route:cache
     deploy:
+      - php artisan config:clear
       - php artisan migrate --force
