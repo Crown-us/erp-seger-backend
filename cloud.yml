@@ -1,0 +1,14 @@
+kind: project
+name: erp-seger-backend
+
+environments:
+  production:
+    database:
+      type: mysql
+      version: 8.0
+    build:
+      - composer install --no-dev --optimize-autoloader
+      - php artisan config:cache
+      - php artisan route:cache
+    deploy:
+      - php artisan migrate --force
