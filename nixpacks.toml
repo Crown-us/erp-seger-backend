@@ -1,13 +1,8 @@
 [phases.setup]
-nixPkgs = ["...", "php84", "php84Packages.composer", "php84Packages.pdo_mysql", "php84Packages.mbstring", "php84Packages.gd", "php84Packages.zip", "php84Packages.intl"]
+nixPkgs = ["php84", "php84Packages.composer", "php84Packages.pdo_mysql", "php84Packages.mbstring", "php84Packages.gd", "php84Packages.zip", "php84Packages.intl", "php84Packages.bcmath"]
 
 [phases.build]
-cmds = [
-    "composer install --no-dev --optimize-autoloader --ignore-platform-reqs",
-    "php artisan config:clear",
-    "php artisan route:clear",
-    "php artisan view:clear"
-]
+cmds = ["composer install --no-dev --optimize-autoloader --ignore-platform-reqs"]
 
 [start]
 cmd = "php artisan config:clear && php artisan migrate --force && php artisan serve --host=0.0.0.0 --port=$PORT"
