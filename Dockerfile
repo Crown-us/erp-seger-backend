@@ -1,44 +1,38 @@
-FROM php:8.4-cli-alpine
+FROM php:8.4-cli
 
-# Install system dependencies & PHP extensions
-RUN apk add --no-cache \
-    bash \
+# Install system dependencies
+RUN apt-get update && apt-get install -y \
+    libpng-dev \
+    libonig-dev \
+    libxml2-dev \
+    zip \
+    unzip \
     git \
     curl \
-    libpng-dev \
     libzip-dev \
-    icu-dev \
-    oniguruma-dev \
-    libxml2-dev \
-    && docker-php-ext-install \
-    pdo_mysql \
-    mbstring \
-    bcmath \
-    gd \
-    zip \
-    intl
+    && apt-get clean && rm -rf /var/lib/apt/lists/*
 
-# Install Composer
+# Install PHP extensions
+RUN docker-php-ext-install pdo_mysql mbstring exif pcntl bcmath gd zip
+
+# Get Composer
 COPY --from=composer:latest /usr/bin/composer /usr/bin/composer
 
-# Set working directory
 WORKDIR /app
-
-# Copy source code
 COPY . .
 
 # Install dependencies
-RUN composer install --optimize-autoloader --no-dev --ignore-platform-reqs
+RUN composer install --no-dev --optimize-autoloader --ignore-platform-reqs
 
-# Bersihkan config cache saat build
+# Clear config
 RUN php artisan config:clear
 
-# Beri permission ke folder Laravel
+# Permissions
 RUN chown -R www-data:www-data /app/storage /app/bootstrap/cache
 
-# Pastikan PORT terbaca
+# Railway PORT
 ENV PORT=8000
 EXPOSE 8000
 
-# Jalankan migrasi dan server (menggunakan shell form agar variabel $PORT terbaca)
-CMD php artisan migrate --force && php artisan serve --host=0.0.0.0 --port=$PORT
+# Gunakan ; agar server tetap naik meskipun migrasi ada kendala (untuk debug)
+CMD php artisan migrate --force ; php artisan serve --host=0.0.0.0 --port=$PORT
