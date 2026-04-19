@@ -14,12 +14,19 @@ COPY . .
 # Install dependencies
 RUN composer install --no-dev --optimize-autoloader --ignore-platform-reqs
 
-# Permissions (Simple & Fast)
+# Permissions
 RUN chown -R www-data:www-data /app/storage /app/bootstrap/cache
 
-# Port dinamis Railway
+# Railway PORT
 ENV PORT=8000
 EXPOSE 8000
 
-# Script startup: Migrasi dulu, baru nyalain server
-CMD php artisan migrate --force && php artisan serve --host=0.0.0.0 --port=$PORT
+# Script startup: Mapping variabel Railway ke Laravel secara otomatis
+CMD sh -c "export DB_HOST=${MYSQLHOST:-$DB_HOST} && \
+    export DB_PORT=${MYSQLPORT:-$DB_PORT} && \
+    export DB_DATABASE=${MYSQLDATABASE:-$DB_DATABASE} && \
+    export DB_USERNAME=${MYSQLUSER:-$DB_USERNAME} && \
+    export DB_PASSWORD=${MYSQLPASSWORD:-$DB_PASSWORD} && \
+    php artisan config:clear && \
+    php artisan migrate --force && \
+    php artisan serve --host=0.0.0.0 --port=$PORT"
