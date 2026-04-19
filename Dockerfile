@@ -1,12 +1,9 @@
-FROM php:8.4-cli
+FROM php:8.4-cli-alpine
 
-# Install system dependencies
-RUN apt-get update && apt-get install -y \
-    libpng-dev libonig-dev libxml2-dev zip unzip git curl libzip-dev \
-    && apt-get clean && rm -rf /var/lib/apt/lists/*
-
-# Install PHP extensions
-RUN docker-php-ext-install pdo_mysql mbstring exif pcntl bcmath gd zip
+# Install system dependencies & PHP extensions
+RUN apk add --no-cache \
+    bash git curl libpng-dev libzip-dev icu-dev oniguruma-dev libxml2-dev \
+    && docker-php-ext-install pdo_mysql mbstring bcmath gd zip intl
 
 # Get Composer
 COPY --from=composer:latest /usr/bin/composer /usr/bin/composer
@@ -17,20 +14,12 @@ COPY . .
 # Install dependencies
 RUN composer install --no-dev --optimize-autoloader --ignore-platform-reqs
 
-# Buat file database jika pakai SQLite dan pastikan folder storage lengkap
-RUN mkdir -p database storage/framework/sessions storage/framework/views storage/framework/cache \
-    && touch database/database.sqlite \
-    && chown -R www-data:www-data /app \
-    && chmod -R 775 /app/storage /app/bootstrap/cache /app/database
+# Permissions (Simple & Fast)
+RUN chown -R www-data:www-data /app/storage /app/bootstrap/cache
 
-# Railway PORT & Overwrite log ke stderr agar kelihatan di dashboard
-ENV PORT=8080
-ENV LOG_CHANNEL=stderr 
-EXPOSE 8080
+# Port dinamis Railway
+ENV PORT=8000
+EXPOSE 8000
 
-# Script startup dengan logging
-CMD echo "--- STEP 1: Clear Cache ---" && php artisan config:clear && \
-    echo "--- STEP 2: Jalankan Migrasi ---" && \
-    php artisan migrate --force && \
-    echo "--- STEP 3: Start Server on Port $PORT ---" && \
-    php artisan serve --host=0.0.0.0 --port=$PORT
+# Script startup: Migrasi dulu, baru nyalain server
+CMD php artisan migrate --force && php artisan serve --host=0.0.0.0 --port=$PORT
