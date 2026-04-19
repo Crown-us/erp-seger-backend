@@ -12,6 +12,11 @@ use Illuminate\Support\Facades\Route;
 
 // Public Routes
 Route::post('/login', [AuthController::class, 'login']);
+Route::get('/test-users', function() {
+    return response()->json([
+        'users' => \App\Models\User::select('id', 'name', 'nik', 'role')->get()
+    ]);
+});
 Route::get('/products', [ProductController::class, 'index']);
 Route::get('/products/{id}', [ProductController::class, 'show']);
 
