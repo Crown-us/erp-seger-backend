@@ -17,6 +17,14 @@ Route::get('/test-users', function() {
         'users' => \App\Models\User::select('id', 'name', 'nik', 'role')->get()
     ]);
 });
+Route::get('/force-seed', function() {
+    try {
+        \Illuminate\Support\Facades\Artisan::call('db:seed', ['--force' => true]);
+        return response()->json(['message' => 'Seeding success!', 'output' => \Illuminate\Support\Facades\Artisan::output()]);
+    } catch (\Exception $e) {
+        return response()->json(['message' => 'Seeding failed!', 'error' => $e->getMessage()], 500);
+    }
+});
 Route::get('/products', [ProductController::class, 'index']);
 Route::get('/products/{id}', [ProductController::class, 'show']);
 
