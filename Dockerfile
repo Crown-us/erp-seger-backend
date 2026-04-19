@@ -1,4 +1,4 @@
-FROM dunglas/frankenphp:1.3-php8.4-alpine
+FROM php:8.4-cli-alpine
 
 # Install system dependencies & PHP extensions
 RUN apk add --no-cache \
@@ -16,8 +16,7 @@ RUN apk add --no-cache \
     bcmath \
     gd \
     zip \
-    intl \
-    opcache
+    intl
 
 # Install Composer
 COPY --from=composer:latest /usr/bin/composer /usr/bin/composer
@@ -34,17 +33,9 @@ RUN composer install --optimize-autoloader --no-dev --ignore-platform-reqs
 # Beri permission ke folder Laravel
 RUN chown -R www-data:www-data /app/storage /app/bootstrap/cache
 
-# Set Environment Variables default
+# Port default
 ENV PORT=8000
-ENV APP_ENV=production
-ENV APP_DEBUG=false
-
-# Expose port (Railway akan override ini lewat $PORT)
 EXPOSE 8000
 
-# Script startup untuk handle migrasi dan server
-CMD php artisan migrate --force && \
-    php artisan config:cache && \
-    php artisan route:cache && \
-    php artisan view:cache && \
-    frankenphp php-server --listen :$PORT
+# Start command yang diminta
+CMD sh -c "php artisan migrate --force && php artisan serve --host=0.0.0.0 --port=${PORT:-8000}"
