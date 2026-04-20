@@ -22,13 +22,13 @@ const SidebarItem = ({ icon: Icon, label, path, active, onClick }) => (
         }`}
     >
         <Icon size={18} className={active ? 'text-white' : 'text-[#706f6c] group-hover:text-[#1b1b18]'} />
-        <span class="font-medium text-sm">{label}</span>
+        <span className="font-medium text-sm">{label}</span>
         {active && <ChevronRight size={14} className="ml-auto opacity-50" />}
     </Link>
 );
 
 const Layout = () => {
-    const [isSidebarOpen, setIsSidebarOpen] = useState(true);
+    const [isSidebarOpen, setIsSidebarOpen] = useState(false);
     const location = useLocation();
     const navigate = useNavigate();
 
@@ -51,28 +51,47 @@ const Layout = () => {
     ];
 
     return (
-        <div className="flex min-h-screen bg-[#FDFDFC]">
-            {/* Sidebar Mobile Toggle */}
-            <button 
-                className="lg:hidden fixed top-4 left-4 z-50 p-2 bg-white border border-[#1914001a] rounded-md shadow-sm"
-                onClick={() => setIsSidebarOpen(!isSidebarOpen)}
-            >
-                {isSidebarOpen ? <X size={20} /> : <Menu size={20} />}
-            </button>
+        <div className="flex h-screen bg-[#FDFDFC] overflow-hidden">
+            {/* Mobile Header */}
+            <div className="lg:hidden fixed top-0 left-0 right-0 h-16 bg-white border-b border-[#1914001a] z-30 flex items-center px-4 justify-between">
+                <div className="font-semibold tracking-tight text-lg">Seger Admin</div>
+                <button 
+                    className="p-2 -mr-2 text-[#1b1b18] hover:bg-[#1914000d] rounded-md transition-colors"
+                    onClick={() => setIsSidebarOpen(true)}
+                >
+                    <Menu size={24} />
+                </button>
+            </div>
+
+            {/* Mobile Backdrop */}
+            {isSidebarOpen && (
+                <div 
+                    className="fixed inset-0 bg-black/20 backdrop-blur-sm z-40 lg:hidden transition-opacity"
+                    onClick={() => setIsSidebarOpen(false)}
+                />
+            )}
 
             {/* Sidebar */}
             <aside className={`
-                fixed inset-y-0 left-0 z-40 w-64 bg-white border-r border-[#1914001a] transform transition-transform duration-300 ease-in-out
+                fixed inset-y-0 left-0 z-50 w-64 bg-white border-r border-[#1914001a] transform transition-transform duration-300 ease-in-out
                 ${isSidebarOpen ? 'translate-x-0' : '-translate-x-full'}
-                lg:relative lg:translate-x-0
+                lg:relative lg:translate-x-0 lg:flex lg:flex-col
             `}>
                 <div className="flex flex-col h-full p-6">
-                    <div className="mb-10 px-2">
-                        <h1 className="text-xl font-semibold tracking-tight">Seger Admin</h1>
-                        <p className="text-[12px] text-[#706f6c]">Management Dashboard</p>
+                    <div className="flex items-center justify-between mb-10 px-2">
+                        <div>
+                            <h1 className="text-xl font-semibold tracking-tight">Seger Admin</h1>
+                            <p className="text-[12px] text-[#706f6c]">Management Dashboard</p>
+                        </div>
+                        <button 
+                            className="lg:hidden p-1 text-[#706f6c] hover:bg-[#1914000d] rounded-md"
+                            onClick={() => setIsSidebarOpen(false)}
+                        >
+                            <X size={20} />
+                        </button>
                     </div>
 
-                    <nav className="flex-1 space-y-1">
+                    <nav className="flex-1 space-y-1 overflow-y-auto">
                         {menuItems.map((item) => (
                             <SidebarItem
                                 key={item.path}
@@ -89,15 +108,15 @@ const Layout = () => {
                             className="flex items-center gap-3 w-full px-4 py-2.5 text-[#706f6c] hover:bg-red-50 hover:text-red-600 rounded-lg transition-all duration-200 group"
                         >
                             <LogOut size={18} className="group-hover:text-red-600" />
-                            <span class="font-medium text-sm">Log out</span>
+                            <span className="font-medium text-sm">Log out</span>
                         </button>
                     </div>
                 </div>
             </aside>
 
             {/* Main Content */}
-            <main className="flex-1 flex flex-col min-w-0 overflow-hidden">
-                <div className="flex-1 overflow-y-auto p-4 lg:p-8">
+            <main className="flex-1 flex flex-col min-w-0 h-full pt-16 lg:pt-0 overflow-y-auto">
+                <div className="p-4 sm:p-6 lg:p-8">
                     <div className="max-w-6xl mx-auto">
                         <Outlet />
                     </div>
