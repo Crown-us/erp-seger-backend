@@ -310,6 +310,17 @@ const Products = () => {
                                         onChange={handleFileChange}
                                     />
                                     <div className="space-y-1.5">
+                                        <label className="text-sm font-medium">Image URL (Optional Link)</label>
+                                        <input 
+                                            name="image_url" 
+                                            value={formData.image_url || ''} 
+                                            onChange={handleInputChange} 
+                                            className="w-full px-4 py-2 border border-[#1914001a] rounded-lg text-sm focus:ring-2 focus:ring-[#1b1b18] focus:outline-none" 
+                                            placeholder="https://example.com/image.jpg" 
+                                        />
+                                        <p className="text-[10px] text-[#706f6c]">Leave empty to use uploaded file or emoji.</p>
+                                    </div>
+                                    <div className="space-y-1.5">
                                         <label className="text-sm font-medium">Emoji Icon (Fallback)</label>
                                         <input 
                                             name="emoji" 
