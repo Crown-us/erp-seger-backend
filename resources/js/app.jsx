@@ -22,11 +22,11 @@ const App = () => {
                 {/* Admin/User Panel with Sidebar */}
                 <Route path="/login" element={<Login />} />
                 <Route path="/admin" element={<Layout />}>
-                    <Route index element={<Home />} />
-                    <Route path="dashboard" element={<Dashboard />} />
+                    <Route index element={<Dashboard />} />
                     <Route path="users" element={<Users />} />
                     <Route path="orders" element={<Orders />} />
                     <Route path="products" element={<Products />} />
+                    <Route path="dashboard" element={<Dashboard />} />
                 </Route>
                 <Route path="*" element={<Navigate to="/" replace />} />
             </Routes>
