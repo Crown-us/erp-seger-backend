@@ -14,6 +14,15 @@ import Login from './pages/Login';
 import BusinessPartners from './pages/BusinessPartners';
 import Profile from './pages/Profile';
 
+// Komponen cerdas buat nentuin halaman pertama setelah klik "Panel"
+const PanelIndex = () => {
+    const user = JSON.parse(localStorage.getItem('user') || '{}');
+    if (user.role === 'pembeli') {
+        return <Navigate to="/admin/orders" replace />;
+    }
+    return <Dashboard />;
+};
+
 const App = () => {
     return (
         <BrowserRouter>
@@ -21,10 +30,12 @@ const App = () => {
                 {/* Public Marketplace */}
                 <Route path="/" element={<Home />} />
                 
-                {/* Admin/User Panel with Sidebar */}
+                {/* Auth */}
                 <Route path="/login" element={<Login />} />
+                
+                {/* Admin/User Panel */}
                 <Route path="/admin" element={<Layout />}>
-                    <Route index element={<Dashboard />} />
+                    <Route index element={<PanelIndex />} />
                     <Route path="users" element={<Users />} />
                     <Route path="partners" element={<BusinessPartners />} />
                     <Route path="orders" element={<Orders />} />
@@ -32,6 +43,7 @@ const App = () => {
                     <Route path="profile" element={<Profile />} />
                     <Route path="dashboard" element={<Dashboard />} />
                 </Route>
+                
                 <Route path="*" element={<Navigate to="/" replace />} />
             </Routes>
         </BrowserRouter>
