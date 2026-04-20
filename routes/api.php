@@ -87,6 +87,7 @@ Route::middleware('auth:sanctum')->group(function () {
         // Order Management
         Route::get('/admin/orders', [AdminController::class, 'indexOrders']);
         Route::post('/admin/orders/{id}/confirm', [AdminController::class, 'confirmOrder']);
+        Route::put('/admin/orders/{id}/status', [AdminController::class, 'updateOrderStatus']);
     });
 
     // Merchant (Pedagang) Routes

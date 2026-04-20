@@ -158,4 +158,20 @@ class AdminController extends Controller
 
         return new OrderResource($order->load(['user', 'items.product']));
     }
+
+    public function updateOrderStatus(Request $request, $id)
+    {
+        $validator = Validator::make($request->all(), [
+            'status' => 'required|in:processing,shipped,completed,cancelled',
+        ]);
+
+        if ($validator->fails()) {
+            return response()->json($validator->errors(), 422);
+        }
+
+        $order = Order::findOrFail($id);
+        $order->update(['status' => $request->status]);
+
+        return new OrderResource($order->load(['user', 'items.product']));
+    }
 }
