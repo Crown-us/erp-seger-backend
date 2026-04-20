@@ -5,6 +5,7 @@ import {
     Users, 
     ShoppingBag, 
     Package,
+    Store,
     LogOut, 
     Menu, 
     X,
@@ -46,10 +47,11 @@ const Layout = () => {
     };
 
     const menuItems = [
-        { icon: LayoutDashboard, label: 'Dashboard', path: '/' },
-        { icon: Users, label: 'Users Management', path: '/users' },
-        { icon: ShoppingBag, label: 'Orders', path: '/orders' },
-        { icon: Package, label: 'Products', path: '/products' },
+        { icon: Store, label: 'Marketplace', path: '/' },
+        { icon: LayoutDashboard, label: 'Dashboard', path: '/dashboard' },
+        { icon: ShoppingBag, label: 'Pesanan Saya', path: '/orders' },
+        { icon: Package, label: 'Produk (Merchant)', path: '/products' },
+        { icon: Users, label: 'Manajemen User', path: '/users' },
     ];
 
     return (

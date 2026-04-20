@@ -6,6 +6,7 @@ import { createRoot } from 'react-dom/client';
 import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
 import Layout from './layouts/Layout';
 import Dashboard from './pages/Dashboard';
+import Home from './pages/Home';
 import Users from './pages/Users';
 import Orders from './pages/Orders';
 import Products from './pages/Products';
@@ -17,7 +18,8 @@ const App = () => {
             <Routes>
                 <Route path="/login" element={<Login />} />
                 <Route path="/" element={<Layout />}>
-                    <Route index element={<Dashboard />} />
+                    <Route index element={<Home />} />
+                    <Route path="dashboard" element={<Dashboard />} />
                     <Route path="users" element={<Users />} />
                     <Route path="orders" element={<Orders />} />
                     <Route path="products" element={<Products />} />
