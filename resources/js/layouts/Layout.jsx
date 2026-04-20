@@ -9,7 +9,9 @@ import {
     Menu, 
     X,
     User,
-    Settings
+    Settings,
+    Building2,
+    UserCircle
 } from 'lucide-react';
 import api from '../lib/axios';
 
@@ -19,12 +21,12 @@ const SidebarItem = ({ icon: Icon, label, path, active, onClick }) => (
         onClick={onClick}
         className={`flex items-center gap-3 px-4 py-3 rounded-2xl transition-all duration-200 ${
             active 
-                ? 'bg-[#1b1b18] text-white shadow-lg' 
+                ? 'bg-[#1b1b18] text-white shadow-lg scale-[1.02]' 
                 : 'text-[#706f6c] hover:bg-[#1b1b180a] hover:text-[#1b1b18]'
         }`}
     >
-        <Icon size={20} />
-        <span className="font-black uppercase tracking-widest text-[10px]">{label}</span>
+        <Icon size={20} strokeWidth={active ? 3 : 2} />
+        <span className={`font-black uppercase tracking-widest text-[10px] ${active ? 'opacity-100' : 'opacity-70'}`}>{label}</span>
     </Link>
 );
 
@@ -41,49 +43,63 @@ const Layout = () => {
         window.location.href = '/';
     };
 
-    // CUMA 3 PILIHAN DI SIDEBAR SESUAI PERMINTAAN
+    // Menu Sidebar yang disesuaikan dengan permintaan: 3 Pilihan Utama per Role
     const menuItems = [
-        { icon: Store, label: 'Buka Toko', path: '/' }, // Pilihan 1: Balik ke Marketplace
-        { 
-            icon: user.role === 'pembeli' ? ShoppingBag : Package, 
-            label: user.role === 'pembeli' ? 'Pesanan Saya' : 'Kelola Produk', 
-            path: user.role === 'pembeli' ? '/admin/orders' : '/admin/products' 
-        }, // Pilihan 2: Menu Utama sesuai Role
-        { icon: Settings, label: 'Manajemen User', path: '/admin/users', roles: ['admin'] }, // Pilihan 3: Khusus Admin
+        { icon: Store, label: 'Buka Toko', path: '/' }, // Semua role bisa balik ke marketplace
+        
+        // Menu Khusus Admin (Dewa Mode)
+        { icon: LayoutDashboard, label: 'Dashboard', path: '/admin', roles: ['admin'] },
+        { icon: Settings, label: 'User & Toko', path: '/admin/users', roles: ['admin'] },
+        { icon: Building2, label: 'Alamat PT', path: '/admin/partners', roles: ['admin'] },
+        
+        // Menu Khusus Pedagang
+        { icon: Package, label: 'Kelola Produk', path: '/admin/products', roles: ['pedagang'] },
+        { icon: ShoppingBag, label: 'Pesanan Masuk', path: '/admin/orders', roles: ['pedagang'] },
+        
+        // Menu Khusus Pembeli
+        { icon: ShoppingBag, label: 'Pesanan Saya', path: '/admin/orders', roles: ['pembeli'] },
+        { icon: UserCircle, label: 'Edit Profil', path: '/admin/profile', roles: ['pembeli', 'pedagang', 'admin'] },
+        
     ].filter(item => !item.roles || item.roles.includes(user.role));
 
     return (
-        <div className="flex h-screen bg-[#FDFDFC] overflow-hidden font-sans">
+        <div className="flex h-screen bg-[#FDFDFC] overflow-hidden font-sans selection:bg-[#1b1b18] selection:text-white">
             {/* Mobile Nav */}
-            <div className="lg:hidden fixed top-0 left-0 right-0 h-16 bg-white border-b border-[#1914001a] z-30 flex items-center px-6 justify-between">
-                <div className="font-black tracking-tighter text-xl">SEGER.</div>
-                <button onClick={() => setIsSidebarOpen(true)}><Menu size={24} /></button>
+            <div className="lg:hidden fixed top-0 left-0 right-0 h-16 bg-white/80 backdrop-blur-md border-b border-[#1914001a] z-30 flex items-center px-6 justify-between">
+                <div className="font-black tracking-tighter text-xl italic uppercase">SEGER.</div>
+                <button onClick={() => setIsSidebarOpen(true)} className="p-2 bg-[#1b1b180a] rounded-xl"><Menu size={24} /></button>
             </div>
 
             {/* Sidebar */}
             <aside className={`
-                fixed inset-y-0 left-0 z-50 w-72 bg-white border-r border-[#1914001a] transform transition-transform duration-300
+                fixed inset-y-0 left-0 z-50 w-72 bg-white border-r border-[#1914001a] transform transition-transform duration-500 ease-in-out
                 ${isSidebarOpen ? 'translate-x-0' : '-translate-x-full'}
                 lg:relative lg:translate-x-0 lg:flex lg:flex-col
             `}>
                 <div className="flex flex-col h-full p-8">
-                    <div className="mb-12">
-                        <h1 className="text-3xl font-black tracking-tighter text-[#1b1b18]">SEGER.</h1>
-                        <p className="text-[10px] font-black uppercase tracking-[0.2em] text-[#706f6c] mt-1">Panel Kendali</p>
+                    <div className="mb-12 flex items-center justify-between">
+                        <div>
+                            <h1 className="text-3xl font-black tracking-tighter text-[#1b1b18] uppercase italic">SEGER.</h1>
+                            <p className="text-[9px] font-black uppercase tracking-[0.3em] text-[#706f6c] mt-1">Control Center</p>
+                        </div>
+                        <button onClick={() => setIsSidebarOpen(false)} className="lg:hidden p-2 hover:bg-gray-100 rounded-xl"><X size={20} /></button>
                     </div>
 
-                    {/* Profile Singkat */}
-                    <div className="mb-10 p-5 bg-[#19140005] rounded-[2rem] border border-[#1914000d] flex items-center gap-4">
-                        <div className="w-12 h-12 rounded-full bg-[#1b1b18] text-white flex items-center justify-center shrink-0 shadow-lg">
-                            <User size={24} />
-                        </div>
-                        <div className="min-w-0">
-                            <div className="text-sm font-black text-[#1b1b18] truncate">{user.name}</div>
-                            <div className="text-[9px] font-black uppercase tracking-widest text-[#706f6c]">{user.role}</div>
+                    {/* Profile Card */}
+                    <div className="mb-10 p-6 bg-[#1b1b18] rounded-[2.5rem] text-white shadow-2xl relative overflow-hidden group">
+                        <div className="absolute top-0 right-0 w-20 h-20 bg-white/5 rounded-full blur-2xl group-hover:scale-150 transition-transform duration-700"></div>
+                        <div className="flex items-center gap-4 relative z-10">
+                            <div className="w-12 h-12 rounded-2xl bg-white/10 backdrop-blur-md flex items-center justify-center shrink-0 border border-white/10 shadow-inner">
+                                <User size={24} strokeWidth={3} />
+                            </div>
+                            <div className="min-w-0">
+                                <div className="text-sm font-black truncate">{user.name}</div>
+                                <div className="text-[9px] font-black uppercase tracking-widest text-white/40 italic">{user.role}</div>
+                            </div>
                         </div>
                     </div>
 
-                    <nav className="flex-1 space-y-2">
+                    <nav className="flex-1 space-y-2 overflow-y-auto no-scrollbar">
                         {menuItems.map((item, index) => (
                             <SidebarItem
                                 key={index}
@@ -97,18 +113,18 @@ const Layout = () => {
                     <div className="mt-auto pt-8 border-t border-[#1914001a]">
                         <button
                             onClick={handleLogout}
-                            className="flex items-center gap-3 w-full px-5 py-4 text-[#706f6c] hover:bg-red-50 hover:text-red-600 rounded-2xl transition-all group"
+                            className="flex items-center gap-4 w-full px-6 py-5 text-[#706f6c] hover:bg-red-50 hover:text-red-600 rounded-[1.5rem] transition-all group font-black uppercase tracking-widest text-[10px]"
                         >
-                            <LogOut size={20} className="group-hover:-translate-x-1 transition-transform" />
-                            <span className="font-black uppercase tracking-widest text-[10px]">Logout</span>
+                            <LogOut size={22} className="group-hover:-translate-x-2 transition-transform duration-300" />
+                            <span>Logout</span>
                         </button>
                     </div>
                 </div>
             </aside>
 
             {/* Main Content */}
-            <main className="flex-1 flex flex-col min-w-0 h-full pt-16 lg:pt-0 overflow-y-auto">
-                <div className="p-6 lg:p-12 max-w-7xl mx-auto w-full">
+            <main className="flex-1 flex flex-col min-w-0 h-full pt-16 lg:pt-0 overflow-y-auto bg-[#FDFDFC]">
+                <div className="p-8 lg:p-16 max-w-7xl mx-auto w-full animate-in fade-in duration-700">
                     <Outlet />
                 </div>
             </main>
