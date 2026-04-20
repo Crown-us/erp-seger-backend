@@ -22,7 +22,8 @@ import {
     Trophy,
     Heart,
     CreditCard,
-    QrCode
+    QrCode,
+    Loader2
 } from 'lucide-react';
 import api from '../lib/axios';
 
@@ -34,11 +35,11 @@ const Home = () => {
     const [category, setCategory] = useState('Semua');
     const [cart, setCart] = useState([]);
     const [showCart, setShowCart] = useState(false);
-    const [paymentMethod, setPaymentMethod] = useState('qris'); // Default
+    const [paymentMethod, setPaymentMethod] = useState('qris');
     const [checkoutLoading, setCheckoutLoading] = useState(false);
     
     const navigate = useNavigate();
-    const user = JSON.parse(localStorage.getItem('user') || 'null');
+    const userLocal = JSON.parse(localStorage.getItem('user') || 'null');
     const isLoggedIn = !!localStorage.getItem('token');
 
     const categories = ['Semua', 'Sembako', 'Minuman', 'Camilan', 'Kebutuhan Rumah'];
@@ -88,16 +89,23 @@ const Home = () => {
 
     const handleCheckout = async () => {
         if (cart.length === 0) return;
-
-        // Validasi Alamat (Sangat Penting)
-        if (!user.workplace_id && !user.workplace_address) {
-            alert('Waduh bro, alamat pengirimanmu belum diset! \n\nSilakan masuk ke Panel User > Edit Profil buat milih Lokasi Kerja (PT) kamu dulu ya.');
-            navigate('/admin/profile');
-            return;
-        }
-        
         setCheckoutLoading(true);
+
         try {
+            // 1. AMBIL DATA USER TERBARU DARI DATABASE (BIAR GAK BASI)
+            const userRes = await api.get('/user');
+            const currentUser = userRes.data.data;
+
+            // 2. VALIDASI ALAMAT DENGAN DATA TERBARU
+            // Cek workplace_id atau workplace_address (khusus pembeli)
+            if (!currentUser.workplace_id && !currentUser.workplace_address) {
+                alert('Waduh bro, alamat pengirimanmu beneran belum ada di database! \n\nSilakan masuk ke Panel User > Edit Profil, pilih PT kamu, terus klik SIMPAN ya.');
+                navigate('/admin/profile');
+                setCheckoutLoading(false);
+                return;
+            }
+
+            // 3. JALANKAN CHECKOUT
             const items = cart.map(item => ({ id: item.id, quantity: item.quantity }));
             await api.post('/orders/checkout', { 
                 items, 
@@ -109,7 +117,8 @@ const Home = () => {
             setShowCart(false);
             navigate('/admin/orders');
         } catch (err) {
-            alert(err.response?.data?.message || 'Checkout gagal. Coba cek lagi datamu bro.');
+            console.error(err);
+            alert(err.response?.data?.message || 'Waduh, checkout gagal. Pastikan alamatmu sudah benar di profil bro.');
         } finally {
             setCheckoutLoading(false);
         }
@@ -143,7 +152,7 @@ const Home = () => {
                             <>
                                 <Link to="/admin" className="flex items-center gap-2 px-5 py-2.5 bg-[#1b1b18] text-white rounded-[1.2rem] text-[10px] font-black uppercase tracking-[0.15em] hover:bg-[#2b2b28] transition-all shadow-[0_10px_20px_-5px_rgba(0,0,0,0.2)] active:scale-95">
                                     <LayoutDashboard size={16} strokeWidth={2.5} />
-                                    <span className="hidden lg:block">Panel {user.role === 'pembeli' ? 'User' : 'Toko'}</span>
+                                    <span className="hidden lg:block">Panel {userLocal?.role === 'pembeli' ? 'User' : 'Toko'}</span>
                                 </Link>
 
                                 <button onClick={() => setShowCart(true)} className="p-3 bg-[#19140005] hover:bg-[#1b1b18] hover:text-white rounded-[1.2rem] relative transition-all group active:scale-95 shadow-sm">
@@ -169,7 +178,6 @@ const Home = () => {
             </nav>
 
             <main className="max-w-7xl mx-auto px-6 lg:px-12 py-12">
-                
                 {/* Hero Section */}
                 <div className="grid grid-cols-1 lg:grid-cols-2 gap-16 items-center mb-24">
                     <div className="space-y-8 animate-in slide-in-from-left duration-700">
@@ -210,8 +218,8 @@ const Home = () => {
                                     </div>
                                 </div>
                                 <div className="space-y-8 flex-1">
-                                    <div className="flex items-center gap-5"><div className="w-14 h-14 bg-gray-50 rounded-2xl flex items-center justify-center text-2xl shadow-inner">🍎</div><div className="space-y-2 flex-1"><div className="h-4 bg-[#1b1b18]/10 rounded-full w-full"></div><div className="h-2.5 bg-[#1b1b18]/5 rounded-full w-1/2"></div></div></div>
-                                    <div className="flex items-center gap-5"><div className="w-14 h-14 bg-gray-50 rounded-2xl flex items-center justify-center text-2xl shadow-inner">🥛</div><div className="space-y-2 flex-1"><div className="h-4 bg-[#1b1b18]/10 rounded-full w-[85%]"></div><div className="h-2.5 bg-[#1b1b18]/5 rounded-full w-1/3"></div></div></div>
+                                    <div className="flex items-center gap-5"><div className="w-14 h-14 bg-gray-50 rounded-2xl flex items-center justify-center text-2xl shadow-inner group-hover/card:scale-110 transition-transform">🍎</div><div className="space-y-2 flex-1"><div className="h-4 bg-[#1b1b18]/10 rounded-full w-full"></div><div className="h-2.5 bg-[#1b1b18]/5 rounded-full w-1/2"></div></div></div>
+                                    <div className="flex items-center gap-5"><div className="w-14 h-14 bg-gray-50 rounded-2xl flex items-center justify-center text-2xl shadow-inner group-hover/card:scale-110 transition-transform">🥛</div><div className="space-y-2 flex-1"><div className="h-4 bg-[#1b1b18]/10 rounded-full w-[85%]"></div><div className="h-2.5 bg-[#1b1b18]/5 rounded-full w-1/3"></div></div></div>
                                 </div>
                             </div>
                         </div>
@@ -291,24 +299,12 @@ const Home = () => {
                                         ))}
                                     </div>
 
-                                    {/* PAYMENT OPTIONS AREA */}
+                                    {/* PAYMENT OPTIONS */}
                                     <div className="pt-10 border-t border-[#1914001a] space-y-6">
                                         <h4 className="text-[10px] font-black uppercase tracking-[0.4em] text-[#706f6c] ml-1">Pilih Pembayaran</h4>
                                         <div className="grid grid-cols-2 gap-4">
-                                            <button 
-                                                onClick={() => setPaymentMethod('qris')}
-                                                className={`p-6 rounded-[2rem] border-2 transition-all flex flex-col items-center gap-3 ${paymentMethod === 'qris' ? 'border-[#1b1b18] bg-[#1b1b18] text-white shadow-xl scale-105' : 'border-[#1914000d] bg-white text-[#706f6c]'}`}
-                                            >
-                                                <QrCode size={32} strokeWidth={paymentMethod === 'qris' ? 3 : 2} />
-                                                <span className="text-[10px] font-black uppercase tracking-widest italic">QRIS Gacor</span>
-                                            </button>
-                                            <button 
-                                                onClick={() => setPaymentMethod('bank_jatim')}
-                                                className={`p-6 rounded-[2rem] border-2 transition-all flex flex-col items-center gap-3 ${paymentMethod === 'bank_jatim' ? 'border-[#1b1b18] bg-[#1b1b18] text-white shadow-xl scale-105' : 'border-[#1914000d] bg-white text-[#706f6c]'}`}
-                                            >
-                                                <CreditCard size={32} strokeWidth={paymentMethod === 'bank_jatim' ? 3 : 2} />
-                                                <span className="text-[10px] font-black uppercase tracking-widest italic">Bank Jatim</span>
-                                            </button>
+                                            <button onClick={() => setPaymentMethod('qris')} className={`p-6 rounded-[2rem] border-2 transition-all flex flex-col items-center gap-3 ${paymentMethod === 'qris' ? 'border-[#1b1b18] bg-[#1b1b18] text-white shadow-xl scale-105' : 'border-[#1914000d] bg-white text-[#706f6c]'}`}><QrCode size={32} strokeWidth={paymentMethod === 'qris' ? 3 : 2} /><span className="text-[10px] font-black uppercase tracking-widest italic">QRIS Gacor</span></button>
+                                            <button onClick={() => setPaymentMethod('bank_jatim')} className={`p-6 rounded-[2rem] border-2 transition-all flex flex-col items-center gap-3 ${paymentMethod === 'bank_jatim' ? 'border-[#1b1b18] bg-[#1b1b18] text-white shadow-xl scale-105' : 'border-[#1914000d] bg-white text-[#706f6c]'}`}><CreditCard size={32} strokeWidth={paymentMethod === 'bank_jatim' ? 3 : 2} /><span className="text-[10px] font-black uppercase tracking-widest italic">Bank Jatim</span></button>
                                         </div>
                                     </div>
                                 </>
@@ -326,7 +322,7 @@ const Home = () => {
                                     disabled={checkoutLoading}
                                     className="w-full bg-[#1b1b18] text-white py-8 rounded-[2.5rem] font-black uppercase tracking-[0.3em] text-sm shadow-[0_30px_60px_-10px_rgba(0,0,0,0.4)] hover:bg-[#2b2b28] hover:scale-[1.02] active:scale-95 transition-all flex items-center justify-center gap-6 group disabled:opacity-50"
                                 >
-                                    {checkoutLoading ? <div className="w-8 h-8 border-4 border-white/20 border-t-white rounded-full animate-spin"></div> : (
+                                    {checkoutLoading ? <Loader2 className="animate-spin" size={32} strokeWidth={3} /> : (
                                         <>Bayar Sekarang <ArrowRight size={32} strokeWidth={3} className="group-hover:translate-x-3 transition-transform" /></>
                                     )}
                                 </button>
