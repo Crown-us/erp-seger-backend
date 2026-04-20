@@ -35,13 +35,13 @@ class OrderController extends Controller
         }
 
         // Logic: use shipping_address from request, or workplace relation address, or user's workplace_address field
-        $shippingAddress = $request->shipping_address ?? ($user->workplace?->address ?? $user->workplace_address);
+        $shippingAddress = $request->shipping_address 
+            ?? ($user->workplace?->address 
+            ?? ($user->workplace_address 
+            ?? ($user->workplace?->name ?? 'Ambil di Kantin/Meja Kerja')));
 
         if (!$shippingAddress) {
-            return response()->json([
-                'success' => false,
-                'message' => 'Alamat pengiriman harus diisi atau pastikan alamat workplace sudah terisi.'
-            ], 422);
+            $shippingAddress = 'Ambil di Kantin (Lokasi Belum Diset)';
         }
 
         try {

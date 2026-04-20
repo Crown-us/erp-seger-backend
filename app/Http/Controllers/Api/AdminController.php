@@ -129,13 +129,49 @@ class AdminController extends Controller
 
         return new UserResource($user);
     }
+public function destroyShop($id)
+{
+    $user = User::where('role', 'pedagang')->findOrFail($id);
+    $user->delete();
 
-    public function destroyShop($id)
-    {
-        $user = User::where('role', 'pedagang')->findOrFail($id);
-        $user->delete();
-        return response()->json(['message' => 'Shop deleted successfully']);
-    }
+    return response()->json(['message' => 'Toko berhasil dihapus']);
+}
+
+/**
+ * Business Partner (PT) Management
+ */
+public function indexPartners()
+{
+    $partners = \App\Models\BusinessPartner::all();
+    return response()->json(['data' => $partners]);
+}
+
+public function storePartner(Request $request)
+{
+    $validator = Validator::make($request->all(), [
+        'name' => 'required|string|max:255',
+        'address' => 'required|string',
+    ]);
+
+    if ($validator->fails()) return response()->json($validator->errors(), 422);
+
+    $partner = \App\Models\BusinessPartner::create($request->all());
+    return response()->json(['message' => 'PT berhasil ditambahkan', 'data' => $partner]);
+}
+
+public function updatePartner(Request $request, $id)
+{
+    $partner = \App\Models\BusinessPartner::findOrFail($id);
+    $partner->update($request->all());
+    return response()->json(['message' => 'PT berhasil diperbarui', 'data' => $partner]);
+}
+
+public function destroyPartner($id)
+{
+    $partner = \App\Models\BusinessPartner::findOrFail($id);
+    $partner->delete();
+    return response()->json(['message' => 'PT berhasil dihapus']);
+}
 
     /**
      * Order Management

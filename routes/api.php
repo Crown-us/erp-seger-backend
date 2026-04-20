@@ -92,6 +92,12 @@ Route::middleware('auth:sanctum')->group(function () {
         Route::put('/admin/shops/{id}', [AdminController::class, 'updateShop']);
         Route::delete('/admin/shops/{id}', [AdminController::class, 'destroyShop']);
 
+        // Business Partner (PT) Management
+        Route::get('/admin/partners', [AdminController::class, 'indexPartners']);
+        Route::post('/admin/partners', [AdminController::class, 'storePartner']);
+        Route::put('/admin/partners/{id}', [AdminController::class, 'updatePartner']);
+        Route::delete('/admin/partners/{id}', [AdminController::class, 'destroyPartner']);
+
         // Order Management
         Route::get('/admin/orders', [AdminController::class, 'indexOrders']);
         Route::post('/admin/orders/{id}/confirm', [AdminController::class, 'confirmOrder']);
