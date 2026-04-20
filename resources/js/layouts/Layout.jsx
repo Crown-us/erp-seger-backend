@@ -11,7 +11,8 @@ import {
     User,
     Settings,
     Building2,
-    UserCircle
+    UserCircle,
+    ClipboardList
 } from 'lucide-react';
 import api from '../lib/axios';
 
@@ -43,21 +44,24 @@ const Layout = () => {
         window.location.href = '/';
     };
 
-    // Menu Sidebar yang disesuaikan dengan permintaan: 3 Pilihan Utama per Role
+    // Menu Sidebar yang disesuaikan
     const menuItems = [
-        { icon: Store, label: 'Buka Toko', path: '/' }, // Semua role bisa balik ke marketplace
+        { icon: Store, label: 'Buka Toko', path: '/' },
         
-        // Menu Khusus Admin (Dewa Mode)
+        // --- MENU ADMIN ---
         { icon: LayoutDashboard, label: 'Dashboard', path: '/admin', roles: ['admin'] },
+        { icon: ClipboardList, label: 'Semua Pesanan', path: '/admin/orders', roles: ['admin'] }, // INI YANG TADI KETINGGALAN
         { icon: Settings, label: 'User & Toko', path: '/admin/users', roles: ['admin'] },
         { icon: Building2, label: 'Alamat PT', path: '/admin/partners', roles: ['admin'] },
         
-        // Menu Khusus Pedagang
+        // --- MENU PEDAGANG ---
         { icon: Package, label: 'Kelola Produk', path: '/admin/products', roles: ['pedagang'] },
         { icon: ShoppingBag, label: 'Pesanan Masuk', path: '/admin/orders', roles: ['pedagang'] },
         
-        // Menu Khusus Pembeli
+        // --- MENU PEMBELI ---
         { icon: ShoppingBag, label: 'Pesanan Saya', path: '/admin/orders', roles: ['pembeli'] },
+        
+        // --- SEMUA ROLE ---
         { icon: UserCircle, label: 'Edit Profil', path: '/admin/profile', roles: ['pembeli', 'pedagang', 'admin'] },
         
     ].filter(item => !item.roles || item.roles.includes(user.role));
@@ -79,7 +83,7 @@ const Layout = () => {
                 <div className="flex flex-col h-full p-8">
                     <div className="mb-12 flex items-center justify-between">
                         <div>
-                            <h1 className="text-3xl font-black tracking-tighter text-[#1b1b18] uppercase italic">SEGER.</h1>
+                            <h1 className="text-3xl font-black tracking-tighter text-[#1b1b18] uppercase italic">SEGER<span className="text-[#706f6c]">.</span></h1>
                             <p className="text-[9px] font-black uppercase tracking-[0.3em] text-[#706f6c] mt-1">Control Center</p>
                         </div>
                         <button onClick={() => setIsSidebarOpen(false)} className="lg:hidden p-2 hover:bg-gray-100 rounded-xl"><X size={20} /></button>
