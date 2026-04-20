@@ -8,6 +8,7 @@ import Layout from './layouts/Layout';
 import Dashboard from './pages/Dashboard';
 import Users from './pages/Users';
 import Orders from './pages/Orders';
+import Products from './pages/Products';
 import Login from './pages/Login';
 
 const App = () => {
@@ -19,6 +20,7 @@ const App = () => {
                     <Route index element={<Dashboard />} />
                     <Route path="users" element={<Users />} />
                     <Route path="orders" element={<Orders />} />
+                    <Route path="products" element={<Products />} />
                 </Route>
                 <Route path="*" element={<Navigate to="/" replace />} />
             </Routes>

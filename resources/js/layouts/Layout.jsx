@@ -4,6 +4,7 @@ import {
     LayoutDashboard, 
     Users, 
     ShoppingBag, 
+    Package,
     LogOut, 
     Menu, 
     X,
@@ -48,6 +49,7 @@ const Layout = () => {
         { icon: LayoutDashboard, label: 'Dashboard', path: '/' },
         { icon: Users, label: 'Users Management', path: '/users' },
         { icon: ShoppingBag, label: 'Orders', path: '/orders' },
+        { icon: Package, label: 'Products', path: '/products' },
     ];
 
     return (
