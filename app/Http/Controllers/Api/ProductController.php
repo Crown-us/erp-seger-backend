@@ -5,28 +5,27 @@ namespace App\Http\Controllers\Api;
 use App\Http\Controllers\Controller;
 use App\Models\Product;
 use Illuminate\Http\Request;
+use App\Http\Resources\ProductResource;
 
 class ProductController extends Controller
 {
     public function index()
     {
-        $products = Product::where('is_active', true)->latest()->get();
-        return response()->json([
+        $products = Product::with('user')->where('is_active', true)->latest()->get();
+        return ProductResource::collection($products)->additional([
             'success' => true,
             'message' => 'List Data Produk',
-            'data'    => $products
-        ], 200);
+        ]);
     }
 
     public function show($id)
     {
-        $product = Product::find($id);
+        $product = Product::with('user')->find($id);
         if ($product) {
-            return response()->json([
+            return (new ProductResource($product))->additional([
                 'success' => true,
                 'message' => 'Detail Data Produk',
-                'data'    => $product
-            ], 200);
+            ]);
         }
 
         return response()->json([

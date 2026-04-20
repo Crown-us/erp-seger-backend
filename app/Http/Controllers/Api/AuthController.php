@@ -11,6 +11,43 @@ use Illuminate\Support\Facades\Validator;
 class AuthController extends Controller
 {
     /**
+     * Handle user registration.
+     */
+    public function register(Request $request)
+    {
+        $validator = Validator::make($request->all(), [
+            'nik'          => 'required|string|unique:users',
+            'name'         => 'required|string|max:255',
+            'email'        => 'required|string|email|max:255|unique:users',
+            'password'     => 'required|string|min:8|confirmed',
+            'role'         => 'required|in:pembeli,pedagang',
+            'workplace_id' => 'nullable|exists:business_partners,id',
+        ]);
+
+        if ($validator->fails()) {
+            return response()->json($validator->errors(), 422);
+        }
+
+        $user = User::create([
+            'nik'          => $request->nik,
+            'name'         => $request->name,
+            'email'        => $request->email,
+            'password'     => Hash::make($request->password),
+            'role'         => $request->role,
+            'workplace_id' => $request->workplace_id,
+        ]);
+
+        $token = $user->createToken('auth_token')->plainTextToken;
+
+        return response()->json([
+            'success' => true,
+            'message' => 'Registrasi berhasil',
+            'token'   => $token,
+            'data'    => new \App\Http\Resources\UserResource($user)
+        ], 201);
+    }
+
+    /**
      * Handle user login using NIK.
      */
     public function login(Request $request)

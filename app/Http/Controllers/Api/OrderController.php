@@ -7,6 +7,7 @@ use App\Models\Order;
 use App\Models\OrderItem;
 use App\Models\Product;
 use App\Models\BusinessPartner;
+use App\Http\Resources\OrderResource;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Validator;
@@ -79,11 +80,10 @@ class OrderController extends Controller
 
                 $order->update(['total_price' => $totalPrice]);
 
-                return response()->json([
+                return (new OrderResource($order->load(['user', 'items.product'])))->additional([
                     'success' => true,
                     'message' => 'Pesanan berhasil dibuat',
-                    'data'    => $order->load('items.product')
-                ], 201);
+                ]);
             });
         } catch (\Exception $e) {
             return response()->json([
@@ -98,14 +98,14 @@ class OrderController extends Controller
      */
     public function myOrders()
     {
-        $orders = Order::with('items.product')
+        $orders = Order::with(['items.product', 'user'])
             ->where('user_id', auth()->id())
             ->latest()
             ->get();
 
-        return response()->json([
+        return OrderResource::collection($orders)->additional([
             'success' => true,
-            'data'    => $orders
+            'message' => 'Daftar Pesanan Saya',
         ]);
     }
 
@@ -126,10 +126,9 @@ class OrderController extends Controller
             ->latest()
             ->get();
 
-        return response()->json([
+        return OrderResource::collection($orders)->additional([
             'success' => true,
             'message' => 'Daftar Pesanan Masuk (Sedang Diproses)',
-            'data'    => $orders
         ]);
     }
 
@@ -138,7 +137,7 @@ class OrderController extends Controller
      */
     public function confirmReceived($id)
     {
-        $order = Order::where('user_id', auth()->id())->findOrFail($id);
+        $order = Order::with(['user', 'items.product'])->where('user_id', auth()->id())->findOrFail($id);
 
         if ($order->status !== 'shipped') {
             return response()->json([
@@ -149,10 +148,9 @@ class OrderController extends Controller
 
         $order->update(['status' => 'completed']);
 
-        return response()->json([
+        return (new OrderResource($order))->additional([
             'success' => true,
             'message' => 'Pesanan telah diterima dan selesai.',
-            'data'    => $order
         ]);
     }
 
@@ -235,10 +233,9 @@ class OrderController extends Controller
 
         $order->update(['status' => $request->status]);
 
-        return response()->json([
+        return (new OrderResource($order->load(['user', 'items.product'])))->additional([
             'success' => true,
             'message' => 'Status pesanan berhasil diperbarui!',
-            'data'    => $order
         ]);
     }
 

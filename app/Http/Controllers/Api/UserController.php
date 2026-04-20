@@ -7,6 +7,8 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Validator;
 
+use App\Http\Resources\UserResource;
+
 class UserController extends Controller
 {
     /**
@@ -14,7 +16,7 @@ class UserController extends Controller
      */
     public function updateProfile(Request $request)
     {
-        $user = $request->user();
+        $user = $request->user()->load('workplace');
         
         $validator = Validator::make($request->all(), [
             'name'  => 'required|string|max:255',
@@ -27,10 +29,9 @@ class UserController extends Controller
 
         $user->update($request->only(['name', 'email']));
 
-        return response()->json([
+        return (new UserResource($user))->additional([
             'success' => true,
             'message' => 'Profile updated successfully',
-            'data'    => $user
         ]);
     }
 
@@ -39,7 +40,7 @@ class UserController extends Controller
      */
     public function updateAddress(Request $request)
     {
-        $user = $request->user();
+        $user = $request->user()->load('workplace');
 
         if ($user->role !== 'pembeli') {
             return response()->json(['message' => 'Only employees can update workplace address'], 403);
@@ -55,10 +56,9 @@ class UserController extends Controller
 
         $user->update(['workplace_address' => $request->workplace_address]);
 
-        return response()->json([
+        return (new UserResource($user))->additional([
             'success' => true,
             'message' => 'Workplace address updated successfully',
-            'data'    => $user
         ]);
     }
 

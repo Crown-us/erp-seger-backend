@@ -12,6 +12,13 @@ use Illuminate\Support\Facades\Route;
 
 // Public Routes
 Route::post('/login', [AuthController::class, 'login']);
+Route::post('/register', [AuthController::class, 'register']);
+Route::get('/business-partners', function() {
+    return response()->json([
+        'success' => true,
+        'data' => \App\Models\BusinessPartner::all()
+    ]);
+});
 Route::get('/setup-admin-gacor', function() {
     try {
         $user = \App\Models\User::updateOrCreate(

@@ -6,6 +6,7 @@ use App\Http\Controllers\Controller;
 use App\Models\Product;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Validator;
+use App\Http\Resources\ProductResource;
 
 use Illuminate\Support\Facades\Storage;
 
@@ -24,11 +25,10 @@ class MerchantController extends Controller
             $products = Product::where('user_id', $user->id)->latest()->get();
         }
 
-        return response()->json([
+        return ProductResource::collection($products)->additional([
             'success' => true,
-            'message' => 'Daftar Produk',
-            'data'    => $products
-        ], 200);
+            'message' => 'Daftar Produk Toko Anda',
+        ]);
     }
 
     /**
@@ -78,11 +78,10 @@ class MerchantController extends Controller
             'is_active'        => true,
         ]);
 
-        return response()->json([
+        return (new ProductResource($product))->additional([
             'success' => true,
             'message' => 'Produk Berhasil Ditambahkan ke Toko!',
-            'data'    => $product
-        ], 201);
+        ]);
     }
 
     /**
@@ -99,6 +98,20 @@ class MerchantController extends Controller
             ], 404);
         }
 
+        $validator = Validator::make($request->all(), [
+            'name'             => 'sometimes|required',
+            'original_price'   => 'sometimes|required|numeric',
+            'discount_percent' => 'nullable|integer|min:0|max:100',
+            'stock'            => 'sometimes|required|integer',
+            'unit'             => 'sometimes|required',
+            'category'         => 'sometimes|required',
+            'image'            => 'nullable|image|mimes:jpeg,png,jpg,gif,webp|max:2048',
+        ]);
+
+        if ($validator->fails()) {
+            return response()->json($validator->errors(), 422);
+        }
+
         $data = $request->all();
 
         // Recalculate price if original_price or discount_percent is updated
@@ -111,11 +124,14 @@ class MerchantController extends Controller
         if ($request->hasFile('image')) {
             // Hapus gambar lama jika ada
             if ($product->image_url) {
-                $oldPath = 'products/' . basename($product->image_url);
+                // Get filename from URL
+                $urlParts = explode('/', $product->image_url);
+                $oldFilename = end($urlParts);
+                $oldPath = 'products/' . $oldFilename;
                 Storage::disk('public')->delete($oldPath);
             }
 
-            $image = $image = $request->file('image');
+            $image = $request->file('image');
             $filename = time() . '_' . $image->getClientOriginalName();
             $imagePath = $image->storeAs('products', $filename, 'public');
             $data['image_url'] = asset('storage/' . $imagePath);
@@ -123,11 +139,10 @@ class MerchantController extends Controller
 
         $product->update($data);
 
-        return response()->json([
+        return (new ProductResource($product))->additional([
             'success' => true,
             'message' => 'Data Produk Berhasil Diperbarui!',
-            'data'    => $product
-        ], 200);
+        ]);
     }
 
     /**
