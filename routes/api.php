@@ -65,7 +65,8 @@ Route::middleware('auth:sanctum')->group(function () {
                 'email' => $user->email,
                 'nik' => $user->nik,
                 'role' => $user->role,
-                'workplace' => $user->workplace?->name ?? $user->workplace,
+                'workplace_id' => $user->workplace_id,
+                'workplace' => $user->workplace?->name,
                 'workplace_address' => $user->workplace?->address ?? $user->workplace_address,
             ]
         ]);

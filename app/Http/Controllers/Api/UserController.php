@@ -19,17 +19,18 @@ class UserController extends Controller
         $user = $request->user()->load('workplace');
         
         $validator = Validator::make($request->all(), [
-            'name'  => 'required|string|max:255',
-            'email' => 'required|email|unique:users,email,' . $user->id,
+            'name'         => 'required|string|max:255',
+            'email'        => 'required|email|unique:users,email,' . $user->id,
+            'workplace_id' => 'nullable|exists:business_partners,id',
         ]);
 
         if ($validator->fails()) {
             return response()->json($validator->errors(), 422);
         }
 
-        $user->update($request->only(['name', 'email']));
+        $user->update($request->only(['name', 'email', 'workplace_id']));
 
-        return (new UserResource($user))->additional([
+        return (new UserResource($user->fresh('workplace')))->additional([
             'success' => true,
             'message' => 'Profile updated successfully',
         ]);
