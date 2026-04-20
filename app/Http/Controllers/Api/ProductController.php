@@ -9,9 +9,19 @@ use App\Http\Resources\ProductResource;
 
 class ProductController extends Controller
 {
-    public function index()
+    public function index(Request $request)
     {
-        $products = Product::with('user')->where('is_active', true)->latest()->get();
+        $query = Product::with('user')->where('is_active', true);
+
+        if ($request->has('category') && $request->category !== 'Semua') {
+            $query->where('category', $request->category);
+        }
+
+        if ($request->has('search')) {
+            $query->where('name', 'like', '%' . $request->search . '%');
+        }
+
+        $products = $query->latest()->get();
         return ProductResource::collection($products)->additional([
             'success' => true,
             'message' => 'List Data Produk',

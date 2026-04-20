@@ -32,6 +32,48 @@ class MerchantController extends Controller
     }
 
     /**
+     * Dashboard stats for merchant.
+     */
+    public function dashboardStats()
+    {
+        $merchantId = auth()->id();
+
+        // 1. Total Turnover (Omzet) from completed/shipped orders
+        $turnover = \App\Models\OrderItem::whereHas('product', function($q) use ($merchantId) {
+                $q->where('user_id', $merchantId);
+            })
+            ->whereHas('order', function($q) {
+                $q->whereIn('status', ['shipped', 'completed']);
+            })
+            ->sum(\Illuminate\Support\Facades\DB::raw('quantity * price'));
+
+        // 2. Active Orders count (pending/processing)
+        $activeOrders = \App\Models\Order::whereHas('items.product', function($q) use ($merchantId) {
+                $q->where('user_id', $merchantId);
+            })
+            ->whereIn('status', ['pending', 'processing'])
+            ->count();
+
+        // 3. Low stock products (less than 5)
+        $lowStockCount = Product::where('user_id', $merchantId)
+            ->where('stock', '<', 5)
+            ->count();
+
+        // 4. Total products
+        $totalProducts = Product::where('user_id', $merchantId)->count();
+
+        return response()->json([
+            'success' => true,
+            'data'    => [
+                'turnover'       => (int) $turnover,
+                'active_orders'  => $activeOrders,
+                'low_stock'      => $lowStockCount,
+                'total_products' => $totalProducts,
+            ]
+        ]);
+    }
+
+    /**
      * Merchant add new product
      */
     public function store(Request $request)

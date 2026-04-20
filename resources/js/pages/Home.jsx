@@ -34,7 +34,12 @@ const Home = () => {
     const fetchProducts = async () => {
         setLoading(true);
         try {
-            const response = await api.get('/products');
+            const response = await api.get('/products', {
+                params: {
+                    search: search,
+                    category: category
+                }
+            });
             setProducts(response.data.data);
         } catch (err) {
             console.error('Failed to fetch products', err);
@@ -44,8 +49,11 @@ const Home = () => {
     };
 
     useEffect(() => {
-        fetchProducts();
-    }, []);
+        const timer = setTimeout(() => {
+            fetchProducts();
+        }, 500);
+        return () => clearTimeout(timer);
+    }, [search, category]);
 
     const addToCart = (product) => {
         if (!isLoggedIn) {

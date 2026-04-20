@@ -100,6 +100,7 @@ Route::middleware('auth:sanctum')->group(function () {
     // Merchant (Pedagang) Routes
     Route::middleware('role:pedagang|admin')->group(function () {
         Route::get('/merchant/products', [MerchantController::class, 'myProducts']);
+        Route::get('/merchant/dashboard', [MerchantController::class, 'dashboardStats']);
         Route::post('/merchant/products', [MerchantController::class, 'store']);
         Route::put('/merchant/products/{id}', [MerchantController::class, 'update']);
         Route::delete('/merchant/products/{id}', [MerchantController::class, 'destroy']);
