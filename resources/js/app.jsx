@@ -14,10 +14,14 @@ import Login from './pages/Login';
 
 const App = () => {
     return (
-        <BrowserRouter basename="/admin">
+        <BrowserRouter>
             <Routes>
+                {/* Public Marketplace */}
+                <Route path="/" element={<Home />} />
+                
+                {/* Admin/User Panel with Sidebar */}
                 <Route path="/login" element={<Login />} />
-                <Route path="/" element={<Layout />}>
+                <Route path="/admin" element={<Layout />}>
                     <Route index element={<Home />} />
                     <Route path="dashboard" element={<Dashboard />} />
                     <Route path="users" element={<Users />} />

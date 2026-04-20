@@ -9,7 +9,8 @@ import {
     LogOut, 
     Menu, 
     X,
-    ChevronRight
+    ChevronRight,
+    User
 } from 'lucide-react';
 import api from '../lib/axios';
 
@@ -33,32 +34,38 @@ const Layout = () => {
     const [isSidebarOpen, setIsSidebarOpen] = useState(false);
     const location = useLocation();
     const navigate = useNavigate();
+    const user = JSON.parse(localStorage.getItem('user') || '{}');
 
     const handleLogout = async () => {
         try {
             await api.post('/logout');
             localStorage.removeItem('token');
+            localStorage.removeItem('user');
             navigate('/login');
         } catch (error) {
             console.error('Logout failed', error);
             localStorage.removeItem('token');
+            localStorage.removeItem('user');
             navigate('/login');
         }
     };
 
-    const menuItems = [
-        { icon: Store, label: 'Marketplace', path: '/' },
-        { icon: LayoutDashboard, label: 'Dashboard', path: '/dashboard' },
-        { icon: ShoppingBag, label: 'Pesanan Saya', path: '/orders' },
-        { icon: Package, label: 'Produk (Merchant)', path: '/products' },
-        { icon: Users, label: 'Manajemen User', path: '/users' },
+    const allMenuItems = [
+        { icon: Store, label: 'Marketplace', path: '/', roles: ['admin', 'pedagang', 'pembeli'] },
+        { icon: LayoutDashboard, label: 'Dashboard', path: '/dashboard', roles: ['admin', 'pedagang'] },
+        { icon: ShoppingBag, label: 'Pesanan Saya', path: '/orders', roles: ['admin', 'pembeli'] },
+        { icon: ShoppingBag, label: 'Pesanan Masuk', path: '/orders', roles: ['pedagang'] },
+        { icon: Package, label: 'Produk Saya', path: '/products', roles: ['admin', 'pedagang'] },
+        { icon: Users, label: 'Manajemen User', path: '/users', roles: ['admin'] },
     ];
+
+    const menuItems = allMenuItems.filter(item => item.roles?.includes(user.role) || user.role === 'admin');
 
     return (
         <div className="flex h-screen bg-[#FDFDFC] overflow-hidden">
             {/* Mobile Header */}
             <div className="lg:hidden fixed top-0 left-0 right-0 h-16 bg-white border-b border-[#1914001a] z-30 flex items-center px-4 justify-between">
-                <div className="font-semibold tracking-tight text-lg">Seger Admin</div>
+                <div className="font-semibold tracking-tight text-lg">Seger Marketplace</div>
                 <button 
                     className="p-2 -mr-2 text-[#1b1b18] hover:bg-[#1914000d] rounded-md transition-colors"
                     onClick={() => setIsSidebarOpen(true)}
@@ -82,10 +89,10 @@ const Layout = () => {
                 lg:relative lg:translate-x-0 lg:flex lg:flex-col
             `}>
                 <div className="flex flex-col h-full p-6">
-                    <div className="flex items-center justify-between mb-10 px-2">
+                    <div className="flex items-center justify-between mb-8 px-2">
                         <div>
-                            <h1 className="text-xl font-semibold tracking-tight">Seger Admin</h1>
-                            <p className="text-[12px] text-[#706f6c]">Management Dashboard</p>
+                            <h1 className="text-xl font-bold tracking-tight">Seger</h1>
+                            <p className="text-[11px] text-[#706f6c] uppercase font-bold tracking-widest mt-0.5">Marketplace</p>
                         </div>
                         <button 
                             className="lg:hidden p-1 text-[#706f6c] hover:bg-[#1914000d] rounded-md"
@@ -95,10 +102,21 @@ const Layout = () => {
                         </button>
                     </div>
 
+                    {/* User Profile Summary */}
+                    <div className="mb-8 px-2 py-3 bg-[#FDFDFC] border border-[#1914001a] rounded-xl flex items-center gap-3">
+                        <div className="w-10 h-10 rounded-full bg-[#1b1b18] text-white flex items-center justify-center shrink-0">
+                            <User size={20} />
+                        </div>
+                        <div className="min-w-0">
+                            <div className="text-sm font-bold text-[#1b1b18] truncate">{user.name || 'User'}</div>
+                            <div className="text-[10px] text-[#706f6c] uppercase font-bold tracking-tighter">{user.role || 'Role'}</div>
+                        </div>
+                    </div>
+
                     <nav className="flex-1 space-y-1 overflow-y-auto">
-                        {menuItems.map((item) => (
+                        {menuItems.map((item, index) => (
                             <SidebarItem
-                                key={item.path}
+                                key={index}
                                 {...item}
                                 active={location.pathname === item.path || (item.path !== '/' && location.pathname.startsWith(item.path))}
                                 onClick={() => window.innerWidth < 1024 && setIsSidebarOpen(false)}

@@ -25,12 +25,6 @@ const Login = () => {
             const response = await api.post('/login', { nik, password });
             const { token, data: user } = response.data;
             
-            if (user.role !== 'admin') {
-                setError('Hanya Admin yang dapat mengakses dashboard ini.');
-                setLoading(false);
-                return;
-            }
-
             localStorage.setItem('token', token);
             localStorage.setItem('user', JSON.stringify(user));
             navigate('/');
@@ -45,8 +39,8 @@ const Login = () => {
         <div className="min-h-screen flex items-center justify-center bg-[#FDFDFC] p-6">
             <div className="w-full max-w-sm">
                 <div className="text-center mb-10">
-                    <h1 className="text-2xl font-semibold tracking-tight">Welcome back</h1>
-                    <p className="text-sm text-[#706f6c] mt-2">Enter your credentials to access admin panel</p>
+                    <h1 className="text-3xl font-bold tracking-tight">Seger Marketplace</h1>
+                    <p className="text-sm text-[#706f6c] mt-2">Masuk dengan NIK untuk mulai belanja atau kelola toko</p>
                 </div>
 
                 <form onSubmit={handleSubmit} className="space-y-4">
