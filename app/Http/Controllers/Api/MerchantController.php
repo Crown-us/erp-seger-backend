@@ -52,8 +52,9 @@ class MerchantController extends Controller
 
         if ($request->hasFile('image')) {
             $image = $request->file('image');
-            $imagePath = $image->storeAs('public/products', time() . '_' . $image->getClientOriginalName());
-            $imageUrl = url(Storage::url($imagePath));
+            $filename = time() . '_' . $image->getClientOriginalName();
+            $imagePath = $image->storeAs('products', $filename, 'public');
+            $imageUrl = asset('storage/' . $imagePath);
         }
 
         $product = Product::create([
@@ -104,13 +105,14 @@ class MerchantController extends Controller
         if ($request->hasFile('image')) {
             // Hapus gambar lama jika ada
             if ($product->image_url) {
-                $oldPath = str_replace(url('/storage'), 'public', $product->image_url);
-                Storage::delete($oldPath);
+                $oldPath = 'products/' . basename($product->image_url);
+                Storage::disk('public')->delete($oldPath);
             }
 
-            $image = $request->file('image');
-            $imagePath = $image->storeAs('public/products', time() . '_' . $image->getClientOriginalName());
-            $data['image_url'] = url(Storage::url($imagePath));
+            $image = $image = $request->file('image');
+            $filename = time() . '_' . $image->getClientOriginalName();
+            $imagePath = $image->storeAs('products', $filename, 'public');
+            $data['image_url'] = asset('storage/' . $imagePath);
         }
 
         $product->update($data);
